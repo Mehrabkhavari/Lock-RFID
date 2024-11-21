@@ -6,6 +6,7 @@
 #define WAIT_TIME       10000  // مدت زمان انتظار برای شناسایی تگ به میلی‌ثانیه
 #define MAX_SAVED_TAGS  10     // تعداد حداکثر تگ‌های ذخیره شده
 #define BUZZER_PIN      2
+#define Relay_PIN      3
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
 MFRC522::Uid savedUIDs[MAX_SAVED_TAGS]; // ذخیره UID تگ‌های قبلی
