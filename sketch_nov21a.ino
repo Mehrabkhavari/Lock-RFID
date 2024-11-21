@@ -54,19 +54,16 @@ void loop()
                     bool levelEntered = false;
                     while (!levelEntered) 
                       {
-                        Serial.println("Enter access level for the tag (1 for allowed, 0 for denied):");
-                        delay(500);
+                        Serial.println("Enter access level for the tag (2 for allowed, 1 for denied):");
+                        delay(100);
+                        
                         while (!Serial.available()) {}
             
                         if (Serial.available() > 0) 
-                          {  
-                            while (Serial.available() > 0) 
-                              { // Clear the buffer
-                                Serial.read();
-                              }
+                          {
                             // <-- Check if there's input
                             accessLevel = Serial.parseInt();
-                            if (accessLevel == 0 || accessLevel == 1) 
+                            if (accessLevel == 1 || accessLevel == 2) 
                               {
                                 levelEntered = true;
                               } 
