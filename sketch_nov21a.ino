@@ -34,6 +34,10 @@
 #define BUZZER_PIN      2
 #define Relay_PIN       3
 
+#define Up_PIN      7
+#define Dn_PIN      8
+#define En_PIN      6
+
 //////////////////////For OLED/////////////////////////////////////////
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -80,18 +84,26 @@ void setup()
 
     pinMode(BUZZER_PIN, OUTPUT);
     pinMode(Relay_PIN, OUTPUT);     // Set relay pin as output
+    pinMode(Up_PIN, INPUT_PULLUP);
+    pinMode(Dn_PIN, INPUT_PULLUP);
+    pinMode(En_PIN, INPUT_PULLUP);
+
     tone(BUZZER_PIN, 500);         // Startup beep
     delay(100);
     noTone(BUZZER_PIN); 
-    Serial.println(F("1: Define new tag"));
+    /*Serial.println(F("1: Define new tag"));
     Serial.println(F("2: Use tags"));
-    Serial.println(F("3: List of tags")); 
+    Serial.println(F("3: List of tags")); */
 
     // Clear the buffer.
     display.clearDisplay();
     display.display();
+    
+  }
 
-    // Display static text
+void menue()
+ {
+  // Display static text
     display.setTextSize(1);
     display.setTextColor(WHITE);
     display.setCursor(0, 9);
@@ -99,155 +111,218 @@ void setup()
     display.println(F("1: Define new tag"));
     display.println(F("2: Use tags"));
     display.println(F("3: List of tags")); 
+    //invertLines(5, 10); // Invert lines 5 to 10
     display.display();
-  }
-//void loop() {}
+ }
 
 void loop()
   {
-    if (Serial.available()) {
-      int command = Serial.parseInt(); 
-      if (command == 1) {
-        bool tagDetected = waitForTag(); 
-        if (tagDetected) {
-          tone(BUZZER_PIN, 1000); 
-          delay(100);
-          noTone(BUZZER_PIN);
-          if (!isTagSaved(mfrc522.uid)) {
-            Serial.println(F("New tag detected and saved."));
-            printUID(mfrc522.uid);
-            Serial.println();
+    menue();
+  }
 
-            savedUIDs[numSavedTags] = mfrc522.uid;
 
-            // Get allowed access count for the tag
-            int accessCount = 0;
-            bool countEntered = false;
-            while (!countEntered) {
-              Serial.println(F("Enter the number of allowed accesses for this tag:"));
-              delay(10);
-              while (!Serial.available()) {} 
-              accessCount = Serial.parseInt();
-              if (accessCount > 0) {
-                countEntered = true;
-              } else {
-                Serial.println(F("Invalid access count. Please enter a number greater than 0."));
+void action()
+  {
+    if (Serial.available()) 
+      {
+        int command = Serial.parseInt(); 
+        if (command == 1)
+          {
+            bool tagDetected = waitForTag(); 
+            if (tagDetected)
+              {
+                tone(BUZZER_PIN, 1000); 
+                delay(100);
+                noTone(BUZZER_PIN);
+                if (!isTagSaved(mfrc522.uid)) 
+                  {
+                    Serial.println(F("New tag detected and saved."));
+                    printUID(mfrc522.uid);
+                    Serial.println();
+
+                    savedUIDs[numSavedTags] = mfrc522.uid;
+
+                    // Get allowed access count for the tag
+                    int accessCount = 0;
+                    bool countEntered = false;
+                    while (!countEntered) 
+                      {
+                        Serial.println(F("Enter the number of allowed accesses for this tag:"));
+                        delay(10);
+                        while (!Serial.available()) {} 
+                        accessCount = Serial.parseInt();
+                        if (accessCount > 0) 
+                          {
+                            countEntered = true;
+                          } 
+                        else 
+                          {
+                            Serial.println(F("Invalid access count. Please enter a number greater than 0."));
+                          }
+                      }
+
+                    Serial.print(F("Access count entered: "));
+                    Serial.println(accessCount);
+                    tagAccessCounts[numSavedTags] = accessCount;
+                    numSavedTags++;
+
+                    Serial.println(F("Done"));
+                    tone(BUZZER_PIN, 1000); 
+                    delay(100);
+                    noTone(BUZZER_PIN);
+                    delay(50);
+                    tone(BUZZER_PIN, 1000); 
+                    delay(100);
+                    noTone(BUZZER_PIN);
+                    if (numSavedTags >= MAX_SAVED_TAGS) 
+                      {
+                        tone(BUZZER_PIN, 200); 
+                        delay(300);
+                        noTone(BUZZER_PIN);    
+                        Serial.println(F("Maximum number of tags reached."));
+                      }
+                  } 
+                else 
+                  {
+                    Serial.println(F("Tag already saved."));
+                  }
               }
-            }
-
-            Serial.print(F("Access count entered: "));
-            Serial.println(accessCount);
-            tagAccessCounts[numSavedTags] = accessCount;
-            numSavedTags++;
-
-            Serial.println(F("Done"));
-            tone(BUZZER_PIN, 1000); 
-            delay(100);
-            noTone(BUZZER_PIN);
-            delay(50);
-            tone(BUZZER_PIN, 1000); 
-            delay(100);
-            noTone(BUZZER_PIN);
-            if (numSavedTags >= MAX_SAVED_TAGS) {
-              tone(BUZZER_PIN, 200); 
-              delay(300);
-              noTone(BUZZER_PIN);    
-              Serial.println(F("Maximum number of tags reached."));
-            }
-          } else {
-            Serial.println(F("Tag already saved."));
-            
+            else
+              {
+                Serial.println(F("No tag detected."));
+              }
+          } 
+        else if (command == 2) 
+          {
+            checkSavedTags(); 
+          } 
+        else if (command == 3) 
+          {
+            printSavedTags(); 
           }
-        } else {
-          Serial.println(F("No tag detected."));
-        }
-      } else if (command == 2) {
-        checkSavedTags(); 
-      } else if (command == 3) {
-        printSavedTags(); 
       }
-    }
   }
 
-bool waitForTag() {
-  Serial.println(F("Waiting for tag..."));
-  unsigned long startTime = millis(); 
-  while (millis() - startTime < WAIT_TIME) {
-    if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
-      delay(50);
-      mfrc522.PICC_HaltA(); 
-      return true;
-    }
-  }
-  return false;
-}
-
-void printUID(MFRC522::Uid uid) {
-  for (byte i = 0; i < uid.size; i++) {
-    Serial.print(uid.uidByte[i] < 0x10 ? " 0" : " ");
-    Serial.print(uid.uidByte[i], HEX);
-  }
-}
-
-void checkSavedTags() {
-  Serial.println(F("Checking saved tags..."));
-  for (int i = 0; i < numSavedTags; i++) {
-    if (waitForTag()) {
-      if (compareUID(savedUIDs[i], mfrc522.uid)) {
-        if (tagAccessCounts[i] > 0) { 
-          Serial.println(F("Access granted."));
-          tagAccessCounts[i]--; // Decrement the access count
-          digitalWrite(Relay_PIN, HIGH);  // Unlock
-          delay(5000);                   // Keep unlocked for 5 seconds
-          digitalWrite(Relay_PIN, LOW);   // Lock
-          Serial.print(F("Remaining access count: "));
-          Serial.println(tagAccessCounts[i]);
-        } else {
-          Serial.println(F("Access denied. No remaining access count."));
-          tone(BUZZER_PIN, 2000);  
-          delay(500);
-          noTone(BUZZER_PIN);
-        }
-        return; 
+void invertLines(int startLine, int endLine) 
+  {
+    for (int y = startLine; y <= endLine; y++) 
+      {
+        for (int x = 0; x < SCREEN_WIDTH; x++) 
+          {
+            int color = display.getPixel(x, y);
+            if (color == WHITE) 
+              {
+                display.drawPixel(x, y, BLACK);
+              }
+            else
+              {
+                display.drawPixel(x, y, WHITE);
+              }
+          }
       }
-    }
+    display.display(); 
   }
-  Serial.println(F("Unknown tag."));
-  // ... (buzzer feedback for unknown tag)
-}
 
-bool isTagSaved(MFRC522::Uid uid) {
-  for (int i = 0; i < numSavedTags; i++) {
-    if (compareUID(savedUIDs[i], uid)) {
-      return true; 
-    }
-  }
-  return false;
-}
-
-bool compareUID(MFRC522::Uid uid1, MFRC522::Uid uid2) {
-  if (uid1.size == uid2.size) {
-    for (byte i = 0; i < uid1.size; i++) {
-      if (uid1.uidByte[i] != uid2.uidByte[i]) {
-        return false;
+bool waitForTag() 
+  {
+    Serial.println(F("Waiting for tag..."));
+    unsigned long startTime = millis(); 
+    while (millis() - startTime < WAIT_TIME) 
+      {
+        if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) 
+          {
+            delay(50);
+            mfrc522.PICC_HaltA(); 
+            return true;
+          }
       }
-    }
-    return true;
+    return false;
   }
-  return false;
-}
 
-void printSavedTags() {
-  tone(BUZZER_PIN, 500); 
-  delay(100);
-  noTone(BUZZER_PIN);
-  Serial.println(F("Saved tags:"));
-  for (int i = 0; i < numSavedTags; i++) {
-    Serial.print("Tag ");
-    Serial.print(i + 1);
-    Serial.print(": ");
-    printUID(savedUIDs[i]);
-    Serial.print(F(" - Remaining Access Count: "));
-    Serial.println(tagAccessCounts[i]); 
+void printUID(MFRC522::Uid uid)
+  {
+    for (byte i = 0; i < uid.size; i++) 
+      {
+        Serial.print(uid.uidByte[i] < 0x10 ? " 0" : " ");
+        Serial.print(uid.uidByte[i], HEX);
+      }
   }
-}
+
+void checkSavedTags() 
+  {
+    Serial.println(F("Checking saved tags..."));
+    for (int i = 0; i < numSavedTags; i++)
+      {
+        if (waitForTag()) 
+          {
+            if (compareUID(savedUIDs[i], mfrc522.uid)) 
+              {
+                if (tagAccessCounts[i] > 0) 
+                  { 
+                    Serial.println(F("Access granted."));
+                    tagAccessCounts[i]--; // Decrement the access count
+                    digitalWrite(Relay_PIN, HIGH);  // Unlock
+                    delay(5000);                   // Keep unlocked for 5 seconds
+                    digitalWrite(Relay_PIN, LOW);   // Lock
+                    Serial.print(F("Remaining access count: "));
+                    Serial.println(tagAccessCounts[i]);
+                  } 
+                else 
+                  {
+                    Serial.println(F("Access denied. No remaining access count."));
+                    tone(BUZZER_PIN, 2000);  
+                    delay(500);
+                    noTone(BUZZER_PIN);
+                  }
+                return; 
+              }
+          }
+      }
+    Serial.println(F("Unknown tag."));
+    // ... (buzzer feedback for unknown tag)
+  }
+
+bool isTagSaved(MFRC522::Uid uid) 
+  {
+    for (int i = 0; i < numSavedTags; i++) 
+      {
+        if (compareUID(savedUIDs[i], uid)) 
+          {
+            return true; 
+          }
+      }
+    return false;
+  }
+
+bool compareUID(MFRC522::Uid uid1, MFRC522::Uid uid2) 
+  {
+    if (uid1.size == uid2.size) 
+      {
+        for (byte i = 0; i < uid1.size; i++) 
+          {
+            if (uid1.uidByte[i] != uid2.uidByte[i]) 
+              {
+                return false;
+              }
+          }
+        return true;
+      }
+    return false;
+  }
+
+void printSavedTags() 
+  {
+    tone(BUZZER_PIN, 500); 
+    delay(100);
+    noTone(BUZZER_PIN);
+    Serial.println(F("Saved tags:"));
+    for (int i = 0; i < numSavedTags; i++) 
+      {
+        Serial.print("Tag ");
+        Serial.print(i + 1);
+        Serial.print(": ");
+        printUID(savedUIDs[i]);
+        Serial.print(F(" - Remaining Access Count: "));
+        Serial.println(tagAccessCounts[i]); 
+      }
+  }
