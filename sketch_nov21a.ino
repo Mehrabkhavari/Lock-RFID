@@ -64,41 +64,43 @@ int tagAccessCounts[MAX_SAVED_TAGS];  // Allowed access counts for each tag
 
 
 
-void setup() {
-  Serial.begin(9600);            // Initialize serial communication
+void setup()
+  {
+    Serial.begin(9600);            // Initialize serial communication
 
-   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  if(!display.begin(SSD1306_SWITCHCAPVCC)) 
-    {
-      Serial.println(F("SSD1306 allocation failed"));
-      for(;;); // Don't proceed, loop forever
-    }
+    // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
+    if(!display.begin(SSD1306_SWITCHCAPVCC)) 
+      {
+        Serial.println(F("SSD1306 allocation failed"));
+        for(;;); // Don't proceed, loop forever
+      }
 
-  SPI.begin();                    // Initialize SPI bus
-  mfrc522.PCD_Init();             // Initialize MFRC522 
+    SPI.begin();                    // Initialize SPI bus
+    mfrc522.PCD_Init();             // Initialize MFRC522 
 
-  pinMode(BUZZER_PIN, OUTPUT);
-  pinMode(Relay_PIN, OUTPUT);     // Set relay pin as output
-  tone(BUZZER_PIN, 500);         // Startup beep
-  delay(100);
-  noTone(BUZZER_PIN); 
-  Serial.println(F("1: Define new tag"));
-  Serial.println(F("2: Use tags"));
-  Serial.println(F("3: List of tags")); 
+    pinMode(BUZZER_PIN, OUTPUT);
+    pinMode(Relay_PIN, OUTPUT);     // Set relay pin as output
+    tone(BUZZER_PIN, 500);         // Startup beep
+    delay(100);
+    noTone(BUZZER_PIN); 
+    Serial.println(F("1: Define new tag"));
+    Serial.println(F("2: Use tags"));
+    Serial.println(F("3: List of tags")); 
 
-  // Clear the buffer.
-  display.clearDisplay();
-  display.display();
+    // Clear the buffer.
+    display.clearDisplay();
+    display.display();
 
-  // Display static text
-  display.setTextSize(2);
-  display.setTextColor(WHITE);
-  display.setCursor(0, 0);
-  display.println(F("Hello World"));
-  display.display();
-
-   
-}
+    // Display static text
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 9);
+    display.println(F("Please select one"));
+    display.println(F("1: Define new tag"));
+    display.println(F("2: Use tags"));
+    display.println(F("3: List of tags")); 
+    display.display();
+  }
 //void loop() {}
 
 void loop()
