@@ -36,7 +36,7 @@
 
 #define Up_PIN      7
 #define Dn_PIN      8
-#define En_PIN      6
+#define En_PIN      10
 
 //////////////////////For OLED/////////////////////////////////////////
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
@@ -108,21 +108,22 @@ void setup()
     display.println(F("1: Define new tag"));
     display.println(F("2: Use tags"));
     display.println(F("3: List of tags")); 
-
-    
-    
   }
+
 int position = 0;
 bool flag[4] = {};
-void menue()
+void menu()
   {
     if(!digitalRead(Up_PIN) && position > 1) position--, delay(150), flag[0] = true; // Invert lines
     if(!digitalRead(Dn_PIN) && position < 3) position++, delay(150), flag[0] = true; // Invert lines 
     if(!digitalRead(En_PIN))
       {
+        display.clearDisplay();
+        display.display();
         if(position == 1) action(1);
         else if(position == 2) action(2);
         else if(position == 3) action(3);
+        delay(150);
       }
 
     if(position == 1 && flag[0] == true)
@@ -153,7 +154,7 @@ void menue()
 
 void loop()
   {
-    menue();
+    menu();
   }
 
 
@@ -234,16 +235,23 @@ void invertLines(int startLine, int endLine)
 bool waitForTag() 
   {
     Serial.println(F("Waiting for tag..."));
+    display.setCursor(0, 8);
+    display.println(F("Waiting for tag..."));
+    display.display();
     unsigned long startTime = millis(); 
+    Serial.println("1");
     while (millis() - startTime < WAIT_TIME) 
       {
+        Serial.println("2");
         if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) 
           {
+            Serial.println("3");
             delay(50);
             mfrc522.PICC_HaltA(); 
             return true;
           }
       }
+    Serial.println("4");
     return false;
   }
 
@@ -259,6 +267,9 @@ void printUID(MFRC522::Uid uid)
 void checkSavedTags() 
   {
     Serial.println(F("Checking saved tags..."));
+    display.setCursor(0, 8);
+    display.println(F("Checking saved tags.."));
+    display.display();
     for (int i = 0; i < numSavedTags; i++)
       {
         if (waitForTag()) 
@@ -268,16 +279,28 @@ void checkSavedTags()
                 if (tagAccessCounts[i] > 0) 
                   { 
                     Serial.println(F("Access granted."));
+                    display.setCursor(0, 8);
+                    display.println(F("Access granted."));
                     tagAccessCounts[i]--; // Decrement the access count
                     digitalWrite(Relay_PIN, HIGH);  // Unlock
                     delay(5000);                   // Keep unlocked for 5 seconds
                     digitalWrite(Relay_PIN, LOW);   // Lock
                     Serial.print(F("Remaining access count: "));
+                    display.setCursor(0, 16);
+                    display.println(F("Remaining access count: "));
                     Serial.println(tagAccessCounts[i]);
+                    display.setCursor(30, 16);
+                    display.println(tagAccessCounts[i]);
+                    display.display();
                   } 
                 else 
                   {
                     Serial.println(F("Access denied. No remaining access count."));
+                    display.setCursor(0, 8);
+                    display.println(F("Access denied"));
+                    display.setCursor(0, 16);
+                    display.println(F("No remaining access count"));
+                    display.display();
                     tone(BUZZER_PIN, 2000);  
                     delay(500);
                     noTone(BUZZER_PIN);
@@ -287,6 +310,9 @@ void checkSavedTags()
           }
       }
     Serial.println(F("Unknown tag."));
+    display.setCursor(0, 8);
+    display.println(F("Unknown tag."));
+    display.display();
     // ... (buzzer feedback for unknown tag)
   }
 
