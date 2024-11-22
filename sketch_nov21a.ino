@@ -111,21 +111,40 @@ void setup()
     
     
   }
-int position = 1;
-int flag = 0;
+int position = 0;
+bool flag[4] = {};
 void menue()
   {
-    if(!digitalRead(Up_PIN) && position > 1) position--, delay(50), flag = 1; // Invert lines
-    if(!digitalRead(Dn_PIN) && position < 3) position++, delay(50), flag = 1; // Invert lines 
+    if(!digitalRead(Up_PIN) && position > 1) position--, delay(150), flag[0] = true; // Invert lines
+    if(!digitalRead(Dn_PIN) && position < 3) position++, delay(150), flag[0] = true; // Invert lines 
     if(!digitalRead(En_PIN))
     {
       
     }
 
-    if(position == 1 && flag == 1)invertLines(16, 24); // Invert lines
-    else if(position == 2 && flag == 1)invertLines(24, 32); // Invert lines
-    else if(position == 3 && flag == 1)invertLines(32, 40); // Invert lines
-    flag = 0;
+    if(position == 1 && flag[0] == true)
+      {
+        invertLines(16, 24); // Invert lines
+        flag[1] = 1;
+        if(flag[2] == true)invertLines(24, 32), flag[2] = false;
+        if(flag[3] == true)invertLines(32, 40), flag[3] = false;
+      }
+    else if(position == 2 && flag[0] == true)
+      {
+        invertLines(24, 32); // Invert lines
+        flag[2] = true;
+        if(flag[1] == true)invertLines(16, 24), flag[1] = false;
+        if(flag[3] == true)invertLines(32, 40), flag[3] = false;
+      }
+    else if(position == 3 && flag[0] == true)
+      {
+        invertLines(32, 40); // Invert lines
+        flag[3] = true;
+        if(flag[1] == true)invertLines(16, 24), flag[1] = false;
+        if(flag[2] == true)invertLines(24, 32), flag[2] = false;
+      }
+
+    flag[0] = false;
     display.display();
   }
 
