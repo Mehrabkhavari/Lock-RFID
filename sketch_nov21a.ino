@@ -30,7 +30,7 @@
 #define RST_PIN         9          // Configurable, see your RFID reader datasheet
 #define SS_PIN          A4         // A4 on Nano is pin 10
 #define WAIT_TIME       10000     // Time to wait for tag (milliseconds)
-#define MAX_SAVED_TAGS  5         // Maximum number of tags to store
+#define MAX_SAVED_TAGS  3         // Maximum number of tags to store
 #define BUZZER_PIN      2
 #define Relay_PIN       3
 
@@ -108,6 +108,7 @@ void setup()
     display.println(F("1: Define new tag"));
     display.println(F("2: Use tags"));
     display.println(F("3: List of tags")); 
+    Serial.println(F("555555555555555555555555555"));
   }
 
 int position = 0;
@@ -239,19 +240,20 @@ bool waitForTag()
     display.println(F("Waiting for tag..."));
     display.display();
     unsigned long startTime = millis(); 
-    Serial.println("1");
+    Serial.println(F("1"));
     while (millis() - startTime < WAIT_TIME) 
       {
-        Serial.println("2");
-        if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) 
+        Serial.println(F("2"));
+        if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) //mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()
           {
-            Serial.println("3");
+            Serial.println(F("3"));
             delay(50);
             mfrc522.PICC_HaltA(); 
+            Serial.println(F("5"));
             return true;
           }
       }
-    Serial.println("4");
+    Serial.println(F("4"));
     return false;
   }
 
@@ -310,7 +312,7 @@ void checkSavedTags()
           }
       }
     Serial.println(F("Unknown tag."));
-    display.setCursor(0, 8);
+    display.setCursor(0, 16);
     display.println(F("Unknown tag."));
     display.display();
     // ... (buzzer feedback for unknown tag)
