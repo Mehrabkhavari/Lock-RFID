@@ -98,12 +98,8 @@ void setup()
     // Clear the buffer.
     display.clearDisplay();
     display.display();
-    
-  }
 
-void menue()
- {
-  // Display static text
+    // Display static text
     display.setTextSize(1);
     display.setTextColor(WHITE);
     display.setCursor(0, 9);
@@ -111,9 +107,27 @@ void menue()
     display.println(F("1: Define new tag"));
     display.println(F("2: Use tags"));
     display.println(F("3: List of tags")); 
-    //invertLines(5, 10); // Invert lines 5 to 10
+
+    
+    
+  }
+int position = 1;
+int flag = 0;
+void menue()
+  {
+    if(!digitalRead(Up_PIN) && position > 1) position--, delay(50), flag = 1; // Invert lines
+    if(!digitalRead(Dn_PIN) && position < 3) position++, delay(50), flag = 1; // Invert lines 
+    if(!digitalRead(En_PIN))
+    {
+      
+    }
+
+    if(position == 1 && flag == 1)invertLines(16, 24); // Invert lines
+    else if(position == 2 && flag == 1)invertLines(24, 32); // Invert lines
+    else if(position == 3 && flag == 1)invertLines(32, 40); // Invert lines
+    flag = 0;
     display.display();
- }
+  }
 
 void loop()
   {
