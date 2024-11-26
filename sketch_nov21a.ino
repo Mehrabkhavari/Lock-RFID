@@ -232,3 +232,18 @@ bool compareUID(MFRC522::Uid uid1, MFRC522::Uid uid2)
   }
 
 void printSavedTags() 
+  {
+    tone(BUZZER_PIN, 500); 
+    delay(100);
+    noTone(BUZZER_PIN);
+    Serial.println(F("Saved tags:"));
+    for (int i = 0; i < numSavedTags; i++) 
+      {
+        Serial.print("Tag ");
+        Serial.print(i + 1);
+        Serial.print(": ");
+        printUID(savedUIDs[i]);
+        Serial.print(F(" - Remaining Access Count: "));
+        Serial.println(tagAccessCounts[i]); 
+      }
+  }
