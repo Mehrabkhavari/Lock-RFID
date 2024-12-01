@@ -1,4 +1,4 @@
-# Smart Lock with RFID and Relay
+![Screenshot 2024-12-01 140307](https://github.com/user-attachments/assets/3351889e-2595-4a0a-8db8-bdcd90577b05)# Smart Lock with RFID and Relay
 
 This project guides you through building a smart lock system using an Arduino board, an RFID reader, a relay module, and a solenoid lock. The system allows you to control access by using RFID tags to unlock a door.
 
@@ -36,7 +36,8 @@ This project guides you through building a smart lock system using an Arduino bo
 * Arduino IDE
 
 ## Wiring Diagram:
-![Uploading Screenshot 2024-12-01 140307.png…]()
+![Screenshot 2024-12-01 140307](https://github.com/user-attachments/assets/3b38190a-caa5-47a1-99d1-dc907001457d)
+
 
 To complete the project, connect the components as follows:
 
