@@ -36,7 +36,8 @@ This project guides you through building a smart lock system using an Arduino bo
 * Arduino IDE
 
 ## Wiring Diagram:
-![Screenshot 2024-12-01 140307](https://github.com/user-attachments/assets/3b38190a-caa5-47a1-99d1-dc907001457d)
+
+![Screenshot 2024-12-01 150112](https://github.com/user-attachments/assets/8e5d7a11-ea75-43a9-8555-97eefda89687)
 
 
 To complete the project, connect the components as follows:
