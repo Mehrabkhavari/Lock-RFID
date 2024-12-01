@@ -80,7 +80,7 @@ void defineNewTag()
     bool tagDetected = waitForTag(); 
     if (tagDetected) 
       {
-        tone(BUZZER_PIN, 1000); 
+        tone(BUZZER_PIN, 2000); 
         delay(100);
         noTone(BUZZER_PIN);
         if (!isTagSaved(mfrc522.uid)) 
@@ -93,7 +93,7 @@ void defineNewTag()
             numSavedTags++;
 
             Serial.println(F("Done"));
-            tone(BUZZER_PIN, 1000); 
+            tone(BUZZER_PIN, 2000); 
             delay(100);
             noTone(BUZZER_PIN);
             delay(50);
@@ -102,7 +102,7 @@ void defineNewTag()
             noTone(BUZZER_PIN);
             if (numSavedTags >= MAX_SAVED_TAGS) 
               {
-                tone(BUZZER_PIN, 200); 
+                tone(BUZZER_PIN, 600); 
                 delay(300);
                 noTone(BUZZER_PIN);    
                 Serial.println(F("Maximum number of tags reached."));
@@ -153,6 +153,9 @@ void checkSavedTags()
           {
             if (compareUID(savedUIDs[i], mfrc522.uid)) 
               {
+                tone(BUZZER_PIN, 4000);  
+                delay(500);
+                noTone(BUZZER_PIN);
                 Serial.println("Access granted.");
                 digitalWrite(Relay_PIN, HIGH);  // Unlock
                 delay(5000);  // Keep unlocked for 5 seconds
@@ -162,8 +165,8 @@ void checkSavedTags()
           }
       }
     Serial.println("Access denied. Unknown tag.");
-    tone(BUZZER_PIN, 2000);  
-    delay(500);
+    tone(BUZZER_PIN, 5000);  
+    delay(1000);
     noTone(BUZZER_PIN);
   }
 
@@ -191,7 +194,7 @@ bool compareUID(MFRC522::Uid uid1, MFRC522::Uid uid2)
 
 void printSavedTags() 
   {
-    tone(BUZZER_PIN, 500); 
+    tone(BUZZER_PIN, 5000); 
     delay(100);
     noTone(BUZZER_PIN);
     Serial.println(F("Saved tags:"));
