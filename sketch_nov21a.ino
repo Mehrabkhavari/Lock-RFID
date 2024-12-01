@@ -21,25 +21,25 @@
 #include <SPI.h>
 #include <MFRC522.h>
 
-#define RST_PIN         9          // Configurable, see your RFID reader datasheet
-#define SS_PIN          A4         // A4 on Nano is pin 10
+#define RST_PIN         9          
+#define SS_PIN          A4         
 #define WAIT_TIME       10000      // Time to wait for tag (milliseconds)
 #define MAX_SAVED_TAGS  10         // Maximum number of tags to store
 #define BUZZER_PIN      2
 #define Relay_PIN       3
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
-MFRC522::Uid savedUIDs[MAX_SAVED_TAGS]; 
+MFRC522::Uid savedUIDs[MAX_SAVED_TAGS]; //Array to store the serials of the tags.
 unsigned int numSavedTags = 0; 
 
 void setup() 
   {
-    Serial.begin(9600);            // Initialize serial communication
-    SPI.begin();                    // Initialize SPI bus
-    mfrc522.PCD_Init();             // Initialize MFRC522 
+    Serial.begin(9600);              // Initialize serial communication
+    SPI.begin();                     // Initialize SPI bus
+    mfrc522.PCD_Init();              // Initialize MFRC522 
     pinMode(BUZZER_PIN, OUTPUT);
     pinMode(Relay_PIN, OUTPUT);     // Set relay pin as output
-    tone(BUZZER_PIN, 500);         // Startup beep
+    tone(BUZZER_PIN, 6000);         // Startup beep
     delay(100);
     noTone(BUZZER_PIN); 
     Serial.println("1: Define new tag");
@@ -77,19 +77,19 @@ void loop()
 
 void defineNewTag() 
   {
-    bool tagDetected = waitForTag(); 
+    bool tagDetected = waitForTag(); //Waiting for tag recognition.
     if (tagDetected) 
       {
         tone(BUZZER_PIN, 2000); 
         delay(100);
         noTone(BUZZER_PIN);
-        if (!isTagSaved(mfrc522.uid)) 
+        if (!isTagSaved(mfrc522.uid)) //Checking saved tags
           {
             Serial.println(F("New tag detected and saved."));
-            printUID(mfrc522.uid);
+            printUID(mfrc522.uid); //Print the serial of the tag.
             Serial.println();
 
-            savedUIDs[numSavedTags] = mfrc522.uid;
+            savedUIDs[numSavedTags] = mfrc522.uid; //Store the serial in array
             numSavedTags++;
 
             Serial.println(F("Done"));
@@ -103,7 +103,7 @@ void defineNewTag()
             if (numSavedTags >= MAX_SAVED_TAGS) 
               {
                 tone(BUZZER_PIN, 600); 
-                delay(300);
+                delay(2000);
                 noTone(BUZZER_PIN);    
                 Serial.println(F("Maximum number of tags reached."));
               }
@@ -119,10 +119,11 @@ void defineNewTag()
       }
   }
 
+//Waiting for tag recognition.
 bool waitForTag() 
   {
     Serial.println("Waiting for tag...");
-    unsigned long startTime = millis(); 
+    //unsigned long startTime = millis(); 
     while (1) //millis() - startTime < WAIT_TIME
       {
         if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) 
@@ -132,7 +133,7 @@ bool waitForTag()
             return true;
           }
       }
-    return false;
+    //return false;
   }
 
 void printUID(MFRC522::Uid uid) 
@@ -144,14 +145,15 @@ void printUID(MFRC522::Uid uid)
       }
   }
 
-void checkSavedTags()
+//Checking saved tags
+void checkSavedTags() 
   {
     Serial.println("Checking saved tags...");
     for (int i = 0; i < numSavedTags; i++) 
       {
         if (waitForTag()) 
           {
-            if (compareUID(savedUIDs[i], mfrc522.uid)) 
+            if (compareUID(savedUIDs[i], mfrc522.uid)) //Compare recognized tag with stored list. 
               {
                 tone(BUZZER_PIN, 4000);  
                 delay(500);
